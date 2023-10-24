@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -19,11 +20,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class Borrow {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private  Long bookId;
 
-    private  String membrUsrname;
+    private  Long userId;
 
-    private Date borrowDate , returnDate , dueDate ;
+    private LocalDate borrowDate , returnDate , dueDate ;
 }

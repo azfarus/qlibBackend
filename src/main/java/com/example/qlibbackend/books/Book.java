@@ -17,11 +17,14 @@ import java.time.Year;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Book {
+
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String title;
+
+
 
     private  Long ISBN;
 
