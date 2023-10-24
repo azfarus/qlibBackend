@@ -47,12 +47,12 @@ public class LibrarianController {
                                               @RequestParam Long totalcopies,
                                               @RequestParam Long availablecopies,
                                               @RequestParam Long authorid1,
-                                              @RequestParam Long authorid2,
-                                              @RequestParam Long authorid3){
+                                              @RequestParam(required = false) Long authorid2,
+                                              @RequestParam(required = false) Long authorid3){
 
         if(!authorDB.existsById(authorid1)) authorid1 = null;
-        if(!authorDB.existsById(authorid2)) authorid2 = null;
-        if(!authorDB.existsById(authorid3)) authorid3 = null;
+        if(authorid2 != null ) if(!authorDB.existsById(authorid2)) authorid2 = null;
+        if(authorid3 != null ) if(!authorDB.existsById(authorid3)) authorid3 = null;
 
         Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3);
         bookDB.save(newBook);
