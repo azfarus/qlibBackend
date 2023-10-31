@@ -144,14 +144,11 @@ public class LibrarianController {
         newMember.setEmail(email);
         newMember.setContactNumber(contactNumber);
         newMember.setUsername(username);
-        newMember.setPassword(generatedPassword); // Store the generated password as-is
-
-        // You might want to add any other necessary logic here, such as setting an initial score.
+        newMember.setPassword(generatedPassword);
 
         // Save the member to the database
         memberDB.save(newMember);
 
-        // Send the generated password to the registered member
         // You can implement sending an email or other notification mechanism here
 
         return ResponseEntity.status(HttpStatus.OK).body("Member registered successfully. Generated password: " + generatedPassword);
