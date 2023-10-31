@@ -7,6 +7,8 @@ import com.example.qlibbackend.books.Book;
 import com.example.qlibbackend.books.BookRepository;
 import com.example.qlibbackend.borrowedbooks.Borrow;
 import com.example.qlibbackend.borrowedbooks.BorrowRepository;
+import com.example.qlibbackend.members.Member;
+import com.example.qlibbackend.members.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/librarian")
@@ -32,6 +35,9 @@ public class LibrarianController {
 
     @Autowired
     BorrowRepository borrowDB;
+
+    @Autowired
+    MemberRepository memberDB;
 
     @Autowired
     ObjectMapper mapper;
@@ -114,4 +120,60 @@ public class LibrarianController {
 
        return ResponseEntity.status(HttpStatus.OK).body("HEHE");
     }
+
+
+    @PostMapping("/member-registration")
+    @ResponseBody
+    private ResponseEntity<String> registerMember(@RequestParam String name,
+                                                  @RequestParam Long memberid,
+                                                  @RequestParam String email,
+                                                  @RequestParam Long contactNumber,
+                                                  @RequestParam String username) {
+        // Check if the username is already taken
+        if (memberDB.existsById(username)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists.");
+        }
+
+        // Generate a random password
+        String generatedPassword = generateRandomPassword();
+
+        // Create a new member
+        Member newMember = new Member();
+        newMember.setName(name);
+        newMember.setMemberid(memberid);
+        newMember.setEmail(email);
+        newMember.setContactNumber(contactNumber);
+        newMember.setUsername(username);
+        newMember.setPassword(generatedPassword); // Store the generated password as-is
+
+        // You might want to add any other necessary logic here, such as setting an initial score.
+
+        // Save the member to the database
+        memberDB.save(newMember);
+
+        // Send the generated password to the registered member
+        // You can implement sending an email or other notification mechanism here
+
+        return ResponseEntity.status(HttpStatus.OK).body("Member registered successfully. Generated password: " + generatedPassword);
+    }
+
+    private String generateRandomPassword() {
+        // Define the characters to use for generating the password
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+";
+
+        // Define the length of the password
+        int length = 10; // You can adjust the length as needed
+
+        // Create a StringBuilder to build the password
+        StringBuilder password = new StringBuilder();
+
+        // Generate the random password
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * chars.length());
+            password.append(chars.charAt(index));
+        }
+
+        return password.toString();
+    }
+
 }

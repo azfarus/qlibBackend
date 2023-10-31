@@ -15,10 +15,7 @@ public class Member {
 
     private Long memberid;
 
-    private String firstName;
-
-
-    private String lastName;
+    private String name;
 
     private Long contactNumber;
 
