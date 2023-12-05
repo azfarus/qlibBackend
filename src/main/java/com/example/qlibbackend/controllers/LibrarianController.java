@@ -7,6 +7,7 @@ import com.example.qlibbackend.books.Book;
 import com.example.qlibbackend.books.BookRepository;
 import com.example.qlibbackend.borrowedbooks.Borrow;
 import com.example.qlibbackend.borrowedbooks.BorrowRepository;
+import com.example.qlibbackend.fines.FineRepository;
 import com.example.qlibbackend.members.Member;
 import com.example.qlibbackend.members.MemberRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +42,9 @@ public class LibrarianController {
 
     @Autowired
     ObjectMapper mapper;
+
+    @Autowired
+    FineRepository fineDB;
 
 
     @PostMapping("/book-entry")
@@ -119,6 +123,41 @@ public class LibrarianController {
         }
 
        return ResponseEntity.status(HttpStatus.OK).body("HEHE");
+    }
+
+    @GetMapping("/book-borrow-deets/{memberid}")
+    @ResponseBody
+    private ResponseEntity<List<Borrow>> book_borrow_data(@PathVariable Long memberid ){
+
+
+
+        return ResponseEntity.status(HttpStatus.OK).body(borrowDB.findAllByUserIdAndReturnDate(memberid,null));
+    }
+
+    @PostMapping("/book-return/{borrowid}")
+    @ResponseBody
+    private ResponseEntity<List<Borrow>> return_book(@PathVariable Long borrowid ){
+
+
+        if(borrowDB.existsById(borrowid)){
+            Optional<Borrow> b = borrowDB.findById(borrowid);
+            b.get().setReturnDate(LocalDate.now());
+            borrowDB.save(b.get());
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+    }
+    @GetMapping("/fine-deets/{borrowid}")
+    @ResponseBody
+    private ResponseEntity<Float> fine_data(@PathVariable Long borrowid ){
+
+        if(fineDB.existsById(borrowid)){
+            return ResponseEntity.status(HttpStatus.OK).body(fineDB.findById(borrowid).get().getAmount());
+        }
+
+
+        return ResponseEntity.status(HttpStatus.OK).body((float)0.00);
     }
 
 

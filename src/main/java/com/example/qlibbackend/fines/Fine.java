@@ -20,11 +20,11 @@ import java.util.Date;
 public class Fine {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private  Long borrowId;
 
     private String membrUsername;
 
-    private  Long borrowId;
+
 
     private Float amount;
 
