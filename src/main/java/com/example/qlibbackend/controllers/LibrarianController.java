@@ -187,6 +187,8 @@ public class LibrarianController {
             bookdata.put("isbn",b.getISBN());
             bookdata.put("publishedon",b.getPublishedOn());
             bookdata.put("bookid",b.getId());
+            bookdata.put("totalcopies",b.getTotalCopies());
+            bookdata.put("availablecopies",b.getAvailableCopies());
             result.add(bookdata);
         }
         for(Book b : auth2match){
@@ -196,6 +198,8 @@ public class LibrarianController {
             bookdata.put("isbn",b.getISBN());
             bookdata.put("publishedon",b.getPublishedOn());
             bookdata.put("bookid",b.getId());
+            bookdata.put("totalcopies",b.getTotalCopies());
+            bookdata.put("availablecopies",b.getAvailableCopies());
             result.add(bookdata);
         }
         for(Book b : auth3match){
@@ -205,6 +209,8 @@ public class LibrarianController {
             bookdata.put("isbn",b.getISBN());
             bookdata.put("publishedon",b.getPublishedOn());
             bookdata.put("bookid",b.getId());
+            bookdata.put("totalcopies",b.getTotalCopies());
+            bookdata.put("availablecopies",b.getAvailableCopies());
             result.add(bookdata);
         }
 
