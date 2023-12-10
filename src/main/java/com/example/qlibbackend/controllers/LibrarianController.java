@@ -7,6 +7,8 @@ import com.example.qlibbackend.books.Book;
 import com.example.qlibbackend.books.BookRepository;
 import com.example.qlibbackend.borrowedbooks.Borrow;
 import com.example.qlibbackend.borrowedbooks.BorrowRepository;
+import com.example.qlibbackend.departments.Genre;
+import com.example.qlibbackend.departments.GenreRepository;
 import com.example.qlibbackend.fines.FineRepository;
 import com.example.qlibbackend.members.Member;
 import com.example.qlibbackend.members.MemberRepository;
@@ -19,8 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @RestController
@@ -46,6 +47,9 @@ public class LibrarianController {
     @Autowired
     FineRepository fineDB;
 
+    @Autowired
+    GenreRepository genreDB;
+
 
     @PostMapping("/book-entry")
     @ResponseBody
@@ -58,13 +62,24 @@ public class LibrarianController {
                                               @RequestParam Long availablecopies,
                                               @RequestParam Long authorid1,
                                               @RequestParam(required = false) Long authorid2,
-                                              @RequestParam(required = false) Long authorid3){
+                                              @RequestParam(required = false) Long authorid3,
+                                              @RequestParam String genre,
+                                                 @RequestParam Boolean isAcademic){
 
+        if(bookDB.existsById(id)) return ResponseEntity.status(HttpStatus.OK).body(null);
         if(!authorDB.existsById(authorid1)) authorid1 = null;
         if(authorid2 != null ) if(!authorDB.existsById(authorid2)) authorid2 = null;
         if(authorid3 != null ) if(!authorDB.existsById(authorid3)) authorid3 = null;
+        genre=genre.trim();
 
-        Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3);
+        Optional<Genre> g = genreDB.findById(genre);
+        if(g.isEmpty()){
+            g= Optional.of(new Genre(genre, isAcademic, null));
+            genreDB.save(g.get());
+        }
+
+
+        Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3 , g.get());
         bookDB.save(newBook);
         return  ResponseEntity.status(HttpStatus.OK).body(null);
     }
@@ -103,6 +118,100 @@ public class LibrarianController {
         return ResponseEntity.status(HttpStatus.OK).body(bookdata);
 
     }
+
+    @GetMapping("/get-genres")
+    @ResponseBody
+    private ResponseEntity<List<String>> get_genres(){
+        List<Genre> genres=genreDB.findAll();
+        List<String> genreNames= new ArrayList<>();
+        for(Genre x : genres){
+            genreNames.add(x.getName());
+        }
+
+        return  ResponseEntity.status(HttpStatus.OK).body(genreNames);
+
+    }
+
+    @GetMapping("/get-authors")
+    @ResponseBody
+    private ResponseEntity<List<ObjectNode>> get_authors(@RequestParam String genreName){
+
+        Optional<Genre> g =genreDB.findById(genreName);
+        if(g.isEmpty()) ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        List<Book> booksOfGenre=bookDB.findBooksByBookGenre(g.get());
+        Set<Long> authorIds = new HashSet<>();
+
+        for(Book b: booksOfGenre){
+            if(b.getAuthorId1() != null) authorIds.add(b.getAuthorId1());
+            if(b.getAuthorId2() != null) authorIds.add(b.getAuthorId2());
+            if(b.getAuthorId3() != null) authorIds.add(b.getAuthorId3());
+        }
+
+        List<ObjectNode> authorDeets = new ArrayList<>();
+
+        for(Long authorId : authorIds){
+            Optional<Author> a = authorDB.findById(authorId);
+            if(a.isPresent()){
+                ObjectNode o = mapper.createObjectNode();
+                o.put("id" , a.get().getId());
+                o.put("name",a.get().getName());
+                authorDeets.add(o);
+            }
+        }
+
+        return  ResponseEntity.status(HttpStatus.OK).body(authorDeets);
+
+    }
+
+    @GetMapping("/get-books")
+    @ResponseBody
+    private ResponseEntity<Set<ObjectNode>> get_books(@RequestParam String genreName , @RequestParam Long authorId){
+
+        genreName.trim();
+        Optional<Genre> g = genreDB.findById(genreName);
+        if(g.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+        List<Book> auth1match=bookDB.findBooksByBookGenreAndAuthorId1(g.get(),authorId);
+        List<Book> auth2match=bookDB.findBooksByBookGenreAndAuthorId2(g.get(),authorId);
+        List<Book> auth3match=bookDB.findBooksByBookGenreAndAuthorId3(g.get(),authorId);
+
+        Set<ObjectNode> result = new HashSet<>();
+
+        for(Book b : auth1match){
+
+
+
+            ObjectNode bookdata = mapper.createObjectNode();
+            bookdata.put("title",b.getTitle());
+            bookdata.put("isbn",b.getISBN());
+            bookdata.put("publishedon",b.getPublishedOn());
+            bookdata.put("bookid",b.getId());
+            result.add(bookdata);
+        }
+        for(Book b : auth2match){
+
+            ObjectNode bookdata = mapper.createObjectNode();
+            bookdata.put("title",b.getTitle());
+            bookdata.put("isbn",b.getISBN());
+            bookdata.put("publishedon",b.getPublishedOn());
+            bookdata.put("bookid",b.getId());
+            result.add(bookdata);
+        }
+        for(Book b : auth3match){
+
+            ObjectNode bookdata = mapper.createObjectNode();
+            bookdata.put("title",b.getTitle());
+            bookdata.put("isbn",b.getISBN());
+            bookdata.put("publishedon",b.getPublishedOn());
+            bookdata.put("bookid",b.getId());
+            result.add(bookdata);
+        }
+
+        return  ResponseEntity.status(HttpStatus.OK).body(result);
+
+    }
+
 
 
     @PostMapping("/book-borrow/{memberid}")

@@ -1,9 +1,8 @@
 package com.example.qlibbackend.books;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import com.example.qlibbackend.departments.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,4 +40,7 @@ public class Book {
     private Long authorId2;
 
     private Long authorId3;
+
+    @ManyToOne
+    private Genre bookGenre;
 }
