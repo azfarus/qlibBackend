@@ -150,6 +150,9 @@ public class StudentController {
 
 
         for(Borrow b : all_borrows){
+
+
+            if(b.getReturnDate() != null) continue;
             ObjectNode o = mapper.createObjectNode();
 
             Optional<Book> book= bookDB.findById(b.getBookId());
