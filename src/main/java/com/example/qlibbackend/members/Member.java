@@ -10,6 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Member {
+
     @Id
     private String username;
 
@@ -24,4 +25,6 @@ public class Member {
     private String password;
 
     private Long score;
+
+
 }

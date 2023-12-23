@@ -51,12 +51,13 @@ public class LoginController {
 
         if(guy.isPresent() && guy.get().getPassword().equals(password)){
 
-            String sessString = username + password + LocalTime.now().toString();
+            String sessString = username + password + Instant.now().toString();
 
             String  hashString = StringHasher.hashString(sessString);
-            Session s = new Session(hashString , Instant.now());
+            Session s = new Session(hashString , Instant.now().plusSeconds(300));
             sessionDB.save(s);
-            return ResponseEntity.status(HttpStatus.OK).body(username);
+            return ResponseEntity.status(HttpStatus.OK).body(hashString);
+
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("FALSE");
     }
