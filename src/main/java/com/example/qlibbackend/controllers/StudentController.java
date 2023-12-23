@@ -56,11 +56,44 @@ public class StudentController {
 
     @GetMapping("/get-all-books")
     @ResponseBody
-    private ResponseEntity<List<ObjectNode>> get_all_books(){
+    private ResponseEntity<List<ObjectNode>> get_all_books() {
         List<ObjectNode> all_book_list = new ArrayList<>();
-        bookDB.findAll();
 
-        return  ResponseEntity.status(HttpStatus.OK).body(null);
+        // Retrieve all books from the database
+        List<Book> allBooks = bookDB.findAll();
+
+        for (Book book : allBooks) {
+            ObjectNode o = mapper.createObjectNode();
+
+            // Populate the ObjectNode with book information
+            o.put("id", book.getId());
+            o.put("title", book.getTitle());
+            o.put("ISBN", book.getISBN());
+            o.put("publishedOn", book.getPublishedOn());
+            o.put("subject", book.getSubject());
+            o.put("totalCopies", book.getTotalCopies());
+            o.put("availableCopies", book.getAvailableCopies());
+
+            // Assuming you want to include author names
+            List<String> authorNames = new ArrayList<>();
+            addAuthorNameIfNotNull(authorNames, book.getAuthorId1());
+            addAuthorNameIfNotNull(authorNames, book.getAuthorId2());
+            addAuthorNameIfNotNull(authorNames, book.getAuthorId3());
+            o.put("authors", String.join(", ", authorNames));
+
+            o.put("genre", book.getBookGenre().getName());
+
+            all_book_list.add(o);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(all_book_list);
+    }
+
+    private void addAuthorNameIfNotNull(List<String> authorNames, Long authorId) {
+        if (authorId != null) {
+            Optional<Author> author = authorDB.findById(authorId);
+            author.ifPresent(value -> authorNames.add(value.getName()));
+        }
     }
 
     @GetMapping("/get-all-borrow")
