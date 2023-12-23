@@ -1,4 +1,8 @@
 package com.example.qlibbackend.ebook;
 
-public class EbookRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface EbookRepository extends JpaRepository<Ebook , Long> {
+
+
 }

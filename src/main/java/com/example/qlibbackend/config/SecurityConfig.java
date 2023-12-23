@@ -52,6 +52,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/login/**").permitAll() // Public resource
+                .antMatchers("/ebook/**").permitAll()
                 .anyRequest().authenticated() // Requires authentication for any other request
                 .and()
                 .httpBasic().and().csrf().disable();
