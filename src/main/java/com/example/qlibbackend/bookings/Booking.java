@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -23,8 +25,8 @@ public class Booking {
     @OneToOne
     private Book book;
 
-    @OneToOne
-    private Member member;
+    @OneToMany
+    private Set<Member> Member;
 
     private Date reservationDate ;
 

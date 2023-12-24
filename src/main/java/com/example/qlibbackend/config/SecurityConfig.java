@@ -8,6 +8,7 @@ import com.example.qlibbackend.members.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,6 +36,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     MemberRepository memberDB;
+
+
 
     public PasswordEncoder passwordEncoder() {
         // Use BCryptPasswordEncoder for password hashing
@@ -78,7 +81,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public InMemoryUserDetailsManager userDetailsService() {
 
         List<UserDetails> allusers = new ArrayList<>();
         List<Librarian>  allLibrarians = librarianDB.findAll();
@@ -110,4 +113,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         return new InMemoryUserDetailsManager(allusers);
     }
+
+
+
+
 }
