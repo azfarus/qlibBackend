@@ -54,6 +54,46 @@ public class StudentController {
     @Autowired
     GenreRepository genreDB;
 
+
+    @GetMapping("/member-info/{username}")
+    @ResponseBody
+    public ResponseEntity<Member> getMemberByUsername(@PathVariable String username) {
+        Optional<Member> memberOptional = memberDB.findMemberByUsername(username);
+
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+            return ResponseEntity.status(HttpStatus.OK).body(member);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PutMapping("/update-member/{username}")
+    @ResponseBody
+    public ResponseEntity<Member> updateMemberInfo(
+            @PathVariable String username,
+            @RequestBody Member updatedMember) {
+
+        Optional<Member> existingMemberOptional = memberDB.findMemberByUsername(username);
+
+        if (existingMemberOptional.isPresent()) {
+            Member existingMember = existingMemberOptional.get();
+
+            // Update email and phone number fields using Lombok-generated setters
+            existingMember.setEmail(updatedMember.getEmail());
+            existingMember.setContactNumber(updatedMember.getContactNumber());
+
+            // Save the updated member to the database
+            memberDB.save(existingMember);
+
+            return ResponseEntity.status(HttpStatus.OK).body(existingMember);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+
+
     @GetMapping("/get-all-books")
     @ResponseBody
     private ResponseEntity<List<ObjectNode>> get_all_books() {
