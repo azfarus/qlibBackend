@@ -1,14 +1,15 @@
 package com.example.qlibbackend.fines;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import com.example.qlibbackend.members.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.Date;
 
@@ -19,16 +20,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class Fine {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private  Long borrowId;
-
-    private String membrUsername;
-
 
 
     private Float amount;
 
-    private Date created;
+    private Instant created;
 
     private Boolean payment;
 }

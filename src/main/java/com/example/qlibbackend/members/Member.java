@@ -2,6 +2,8 @@ package com.example.qlibbackend.members;
 
 import javax.persistence.*;
 ;
+import com.example.qlibbackend.bookings.Booking;
+import com.example.qlibbackend.fines.Fine;
 import lombok.*;
 
 @Entity
@@ -25,6 +27,12 @@ public class Member {
     private String password;
 
     private Long score;
+
+    @OneToOne
+    private Fine fine;
+
+    @OneToOne
+    private Booking booking;
 
 
 }

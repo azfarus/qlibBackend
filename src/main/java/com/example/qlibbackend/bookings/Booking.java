@@ -1,9 +1,9 @@
 package com.example.qlibbackend.bookings;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import com.example.qlibbackend.books.Book;
+import com.example.qlibbackend.members.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,11 +20,15 @@ public class Booking {
     @Id
     private Long id;
 
-    private  Long bookId;
+    @OneToOne
+    private Book book;
 
-    private  String membrUsrname;
+    @OneToOne
+    private Member member;
 
     private Date reservationDate ;
 
     private Boolean status;
+
+
 }

@@ -2,6 +2,7 @@ package com.example.qlibbackend.books;
 
 import javax.persistence.*;
 
+import com.example.qlibbackend.bookings.Booking;
 import com.example.qlibbackend.departments.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -43,4 +44,8 @@ public class Book {
 
     @ManyToOne
     private Genre bookGenre;
+
+
+    @OneToOne
+    private Booking booking;
 }

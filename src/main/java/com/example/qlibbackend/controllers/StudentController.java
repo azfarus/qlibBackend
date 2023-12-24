@@ -11,6 +11,7 @@ import com.example.qlibbackend.borrowedbooks.Borrow;
 import com.example.qlibbackend.borrowedbooks.BorrowRepository;
 import com.example.qlibbackend.departments.Genre;
 import com.example.qlibbackend.departments.GenreRepository;
+import com.example.qlibbackend.fines.Fine;
 import com.example.qlibbackend.fines.FineRepository;
 import com.example.qlibbackend.members.Member;
 import com.example.qlibbackend.members.MemberRepository;
@@ -157,9 +158,10 @@ public class StudentController {
 
             Optional<Book> book= bookDB.findById(b.getBookId());
             if(book.isEmpty()) return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            String authornames = "";
 
-           if(book.get().getAuthorId1() != null){
+
+            String authornames = "";
+            if(book.get().getAuthorId1() != null){
                Optional<Author> a = authorDB.findById(book.get().getAuthorId1());
                if(a.isEmpty()) return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                authornames+=a.get().getName();
@@ -179,6 +181,9 @@ public class StudentController {
                 authornames+=", ";
             }
 
+
+            Optional<Fine> fine = fineDB.findById(b.getId());
+
             o.put("id" , b.getId());
             o.put("genre" ,book.get().getBookGenre().getName());
             o.put("title",book.get().getTitle());
@@ -186,6 +191,9 @@ public class StudentController {
             o.put("author", authornames);
             o.put("borrowedDeadline",b.getDueDate().toString());
             o.put("reservation_date",b.getBorrowDate().toString());
+            o.put("fine" , "0.0");
+            fine.ifPresent(value -> o.put("fine", value.getAmount().toString()));
+
 
             all_order_list.add(o);
 

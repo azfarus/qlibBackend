@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;
@@ -79,7 +80,7 @@ public class LibrarianController {
         }
 
 
-        Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3 , g.get());
+        Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3 , g.get() ,null);
         bookDB.save(newBook);
         return  ResponseEntity.status(HttpStatus.OK).body(null);
     }
@@ -224,6 +225,10 @@ public class LibrarianController {
     @ResponseBody
     private ResponseEntity<String> book_borrow(@PathVariable Long memberid , @RequestParam List<Long> bookids){
 
+
+        long seconds = 30;
+
+
         for(Long x : bookids){
             Optional<Book> book = bookDB.findById(x);
 
@@ -231,8 +236,8 @@ public class LibrarianController {
             if(book.get().getAvailableCopies() <= 0) continue;
 
             book.get().setAvailableCopies(book.get().getAvailableCopies()-1);
-            LocalDate cur = LocalDate.now();
-            LocalDate due = cur.plusDays(14);
+            Instant cur = Instant.now();
+            Instant due = cur.plusSeconds(seconds);
             Borrow b = new Borrow(null ,x , memberid , cur , null , due);
             borrowDB.save(b);
         }
@@ -256,7 +261,7 @@ public class LibrarianController {
 
         if(borrowDB.existsById(borrowid)){
             Optional<Borrow> b = borrowDB.findById(borrowid);
-            b.get().setReturnDate(LocalDate.now());
+            b.get().setReturnDate(Instant.now());
             borrowDB.save(b.get());
             return ResponseEntity.status(HttpStatus.OK).body(null);
         }

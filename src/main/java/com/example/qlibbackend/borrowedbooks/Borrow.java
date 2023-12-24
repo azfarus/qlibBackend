@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Date;
 
@@ -27,5 +28,5 @@ public class Borrow {
 
     private  Long userId;
 
-    private LocalDate borrowDate , returnDate , dueDate ;
+    private Instant borrowDate , returnDate , dueDate ;
 }
