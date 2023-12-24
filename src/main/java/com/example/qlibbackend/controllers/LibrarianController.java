@@ -80,7 +80,7 @@ public class LibrarianController {
         }
 
 
-        Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3 , g.get() ,null);
+        Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3 , g.get() );
         bookDB.save(newBook);
         return  ResponseEntity.status(HttpStatus.OK).body(null);
     }

@@ -24,8 +24,8 @@ public class Booking {
     @Id
     private Long bookid;
 
-    @OneToMany
-    private Set<Member> Member;
+    @OneToMany(mappedBy = "booking")
+    private Set<Member> member;
 
     private Instant reservationDate ;
 

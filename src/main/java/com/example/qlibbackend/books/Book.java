@@ -46,6 +46,5 @@ public class Book {
     private Genre bookGenre;
 
 
-    @OneToOne
-    private Booking booking;
+
 }
