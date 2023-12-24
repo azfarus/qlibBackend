@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -19,16 +20,14 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Booking {
-    @Id
-    private Long id;
 
-    @OneToOne
-    private Book book;
+    @Id
+    private Long bookid;
 
     @OneToMany
     private Set<Member> Member;
 
-    private Date reservationDate ;
+    private Instant reservationDate ;
 
     private Boolean status;
 

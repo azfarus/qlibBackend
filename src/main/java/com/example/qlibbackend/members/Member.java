@@ -31,8 +31,10 @@ public class Member {
     @OneToOne
     private Fine fine;
 
-    @OneToOne
+    @ManyToOne
     private Booking booking;
+
+
 
 
 }

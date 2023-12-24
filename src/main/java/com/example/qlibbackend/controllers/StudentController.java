@@ -5,6 +5,8 @@ package com.example.qlibbackend.controllers;
 
 import com.example.qlibbackend.authors.Author;
 import com.example.qlibbackend.authors.AuthorRepository;
+import com.example.qlibbackend.bookings.Booking;
+import com.example.qlibbackend.bookings.BookingRepository;
 import com.example.qlibbackend.books.Book;
 import com.example.qlibbackend.books.BookRepository;
 import com.example.qlibbackend.borrowedbooks.Borrow;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;
@@ -55,6 +58,8 @@ public class StudentController {
     @Autowired
     GenreRepository genreDB;
 
+    @Autowired
+    BookingRepository bookingDB;
 
     @GetMapping("/member-info/{username}")
     @ResponseBody
@@ -206,7 +211,31 @@ public class StudentController {
     }
 
 
+    @PostMapping("/reserve")
+    @ResponseBody
+    private ResponseEntity<Long> reserve_book(@RequestParam String username , @RequestParam Long bookid){
+        Optional<Book> book = bookDB.findById(bookid);
+        Optional<Member> member = memberDB.findMemberByUsername(username);
 
+        if(book.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((long)-1);
+        if(member.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((long)-1);
+
+        Optional<Booking> booking = bookingDB.findById(book.get());
+
+        if(booking.isEmpty()){
+            Set<Member> memberSet = new HashSet<>();
+            memberSet.add(member.get());
+            Booking b = new Booking(book.get().getId() ,memberSet, Instant.now(),false);
+            bookingDB.save(b);
+        }
+        else{
+            booking.get().getMember().add(member.get());
+            booking.get().setStatus(false);
+            bookingDB.save(booking.get());
+        }
+        return ResponseEntity.status(HttpStatus.OK).body((long)-1);
+
+    }
 
 
 
