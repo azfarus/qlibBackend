@@ -4,7 +4,10 @@ import javax.persistence.*;
 ;
 import com.example.qlibbackend.bookings.Booking;
 import com.example.qlibbackend.fines.Fine;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+
+import java.io.Serializable;
 
 @Entity
 @Getter
@@ -24,15 +27,19 @@ public class Member {
 
     private String email;
 
+    @JsonIgnore
     private String password;
 
     private Long score;
 
     @OneToOne
+    @JsonIgnore
     private Fine fine;
 
     @ManyToOne
+    @JsonIgnore
     private Booking booking;
+
 
 
 

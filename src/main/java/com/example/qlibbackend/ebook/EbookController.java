@@ -60,7 +60,7 @@ public class EbookController {
 
     @GetMapping("/get/allebooks")
     @ResponseBody
-    private List<Ebook> all_ebook(){
+    private List<ObjectNode> all_ebook(){
         List<Ebook> all_ebook =ebookDB.findAll();
         List<ObjectNode> all_ebook_info = new ArrayList<>();
         for(Ebook x : all_ebook){
@@ -70,12 +70,13 @@ public class EbookController {
 
             ebook_info.put("ebookId" , x.getEbookId()); //use api in line 45 witt this ebook id to download ebook
             ebook_info.put("ebookFileName",f.getFilename()); // this is the file name
-            ebook_info.put("ebookPhotoId",x.getPhotoId()); // this gives the associated cover photo, use /file/{id} api in filecontroller
+            ebook_info.put("ebookPhotoId",f.getData().length / (1024 * 1024.0)); // this gives the associated cover photo, use /file/{id} api in filecontroller
 
 
+            all_ebook_info.add(ebook_info);
         }
 
 
-        return  ebookDB.findAll();
+        return  all_ebook_info;
     }
 }

@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,12 +25,12 @@ public class Booking {
     @Id
     private Long bookid;
 
-    @OneToMany(mappedBy = "booking")
-    private Set<Member> member;
+    @OneToMany(mappedBy = "booking" , cascade = CascadeType.ALL , fetch = FetchType.EAGER)
+    private Set<Member> member = new HashSet<>();
 
     private Instant reservationDate ;
 
-    private Boolean status;
+    private String status;
 
 
 }

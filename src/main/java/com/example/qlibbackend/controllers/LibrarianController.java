@@ -3,12 +3,15 @@ package com.example.qlibbackend.controllers;
 
 import com.example.qlibbackend.authors.Author;
 import com.example.qlibbackend.authors.AuthorRepository;
+import com.example.qlibbackend.bookings.Booking;
+import com.example.qlibbackend.bookings.BookingRepository;
 import com.example.qlibbackend.books.Book;
 import com.example.qlibbackend.books.BookRepository;
 import com.example.qlibbackend.borrowedbooks.Borrow;
 import com.example.qlibbackend.borrowedbooks.BorrowRepository;
 import com.example.qlibbackend.departments.Genre;
 import com.example.qlibbackend.departments.GenreRepository;
+import com.example.qlibbackend.email.GmailEmailSender;
 import com.example.qlibbackend.fines.FineRepository;
 import com.example.qlibbackend.members.Member;
 import com.example.qlibbackend.members.MemberRepository;
@@ -51,6 +54,12 @@ public class LibrarianController {
     @Autowired
     GenreRepository genreDB;
 
+    @Autowired
+    GmailEmailSender gmailEmailSender;
+
+    @Autowired
+    BookingRepository bookingDB;
+
 
     @PostMapping("/book-entry")
     @ResponseBody
@@ -67,7 +76,14 @@ public class LibrarianController {
                                               @RequestParam String genre,
                                                  @RequestParam Boolean isAcademic){
 
-        if(bookDB.existsById(id)) return ResponseEntity.status(HttpStatus.OK).body(null);
+        if(bookDB.existsById(id)){
+
+
+
+
+
+            return ResponseEntity.status(HttpStatus.OK).body(null);
+        }
         if(!authorDB.existsById(authorid1)) authorid1 = null;
         if(authorid2 != null ) if(!authorDB.existsById(authorid2)) authorid2 = null;
         if(authorid3 != null ) if(!authorDB.existsById(authorid3)) authorid3 = null;
@@ -79,6 +95,13 @@ public class LibrarianController {
             genreDB.save(g.get());
         }
 
+
+        Optional<Booking> booking = bookingDB.findById(id);
+
+        if(booking.isEmpty()){
+            Booking b = new Booking(id,new HashSet<>() ,Instant.now() , "available");
+            bookingDB.save(b);
+        }
 
         Book newBook = new Book(id , title,isbn, year, subject , totalcopies , availablecopies , authorid1 , authorid2 , authorid3 , g.get() );
         bookDB.save(newBook);
@@ -238,6 +261,19 @@ public class LibrarianController {
             book.get().setAvailableCopies(book.get().getAvailableCopies()-1);
             Instant cur = Instant.now();
             Instant due = cur.plusSeconds(seconds);
+
+            Optional<Booking> booking = bookingDB.findById(book.get().getId());
+
+            if(booking.isEmpty()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("HEHE");
+            }
+
+            if(book.get().getAvailableCopies() == 0){
+                booking.get().setStatus("unavailable");
+            }
+
+            bookingDB.save(booking.get());
+
             Borrow b = new Borrow(null ,x , memberid , cur , null , due);
             borrowDB.save(b);
         }
@@ -263,6 +299,26 @@ public class LibrarianController {
             Optional<Borrow> b = borrowDB.findById(borrowid);
             b.get().setReturnDate(Instant.now());
             borrowDB.save(b.get());
+
+
+
+            Long bookId = b.get().getBookId();
+            Optional<Booking> booking = bookingDB.findById(bookId);
+            Optional<Book> book = bookDB.findById(bookId);
+
+            if(book.isEmpty() || booking.isEmpty()) ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+
+
+            book.get().setAvailableCopies(book.get().getAvailableCopies()+1);
+            bookDB.save(book.get());
+
+            booking.get().setStatus("available");
+            bookingDB.save(booking.get());
+
+
+
+
+
             return ResponseEntity.status(HttpStatus.OK).body(null);
         }
 
@@ -287,7 +343,7 @@ public class LibrarianController {
                                                   @RequestParam Long memberid,
                                                   @RequestParam String email,
                                                   @RequestParam Long contactNumber,
-                                                  @RequestParam String username) {
+                                                  @RequestParam String username) throws Exception {
         // Check if the username is already taken
         if (memberDB.existsById(username)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username already exists.");
@@ -309,7 +365,8 @@ public class LibrarianController {
         memberDB.save(newMember);
 
         // You can implement sending an email or other notification mechanism here
-
+        String message= "Congratulations, you are a member!\nUsername: "+username+"\nPassword: "+generatedPassword;
+        gmailEmailSender.sendEmail(email, "Qlibrary Registration" ,message);
         return ResponseEntity.status(HttpStatus.OK).body("Member registered successfully. Generated password: " + generatedPassword);
     }
 

@@ -24,9 +24,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.Year;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -142,6 +141,13 @@ public class StudentController {
         }
     }
 
+
+    private static String instantToString(Instant instant) {
+        // Convert Instant to LocalDate in UTC timezone
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.of("UTC"));
+        return formatter.format(instant);
+    }
+
     @GetMapping("/get-all-borrow")
     @ResponseBody
     private ResponseEntity<List<ObjectNode>> get_all_borrow(@RequestParam String username){
@@ -188,14 +194,21 @@ public class StudentController {
 
 
             Optional<Fine> fine = fineDB.findById(b.getId());
+            Duration duration = Duration.between( b.getDueDate(),Instant.now() );
 
             o.put("id" , b.getId());
             o.put("genre" ,book.get().getBookGenre().getName());
             o.put("title",book.get().getTitle());
 
             o.put("author", authornames);
-            o.put("borrowedDeadline",b.getDueDate().toString());
-            o.put("reservation_date",b.getBorrowDate().toString());
+            o.put("borrowedDeadline",instantToString(b.getDueDate()));
+            o.put("reservation_date",instantToString(b.getBorrowDate()));
+            o.put("overdue" ,"0" );
+            if( duration.getSeconds() > 0 ){
+                Long days = duration.getSeconds()/86400;
+
+                o.put("overdue" , days);
+            }
             o.put("fine" , "0.0");
             fine.ifPresent(value -> o.put("fine", value.getAmount().toString()));
 
@@ -214,25 +227,23 @@ public class StudentController {
     @PostMapping("/reserve")
     @ResponseBody
     private ResponseEntity<Long> reserve_book(@RequestParam String username , @RequestParam Long bookid){
+
+        Optional<Booking> booking = bookingDB.findById(bookid);
         Optional<Book> book = bookDB.findById(bookid);
         Optional<Member> member = memberDB.findMemberByUsername(username);
 
-        if(book.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((long)-1);
-        if(member.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((long)-1);
 
-        Optional<Booking> booking = bookingDB.findById(book.get());
+        if(booking.isEmpty() || book.isEmpty() || member.isEmpty()) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((long)-1);
+        if(book.get().getAvailableCopies() > 0) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body((long)-2);
 
-        if(booking.isEmpty()){
-            Set<Member> memberSet = new HashSet<>();
-            memberSet.add(member.get());
-            Booking b = new Booking(book.get().getId() ,memberSet, Instant.now(),false);
-            bookingDB.save(b);
-        }
-        else{
-            booking.get().getMember().add(member.get());
-            booking.get().setStatus(false);
-            bookingDB.save(booking.get());
-        }
+
+
+        member.get().setBooking(booking.get());
+
+        memberDB.save(member.get());
+
+
+
         return ResponseEntity.status(HttpStatus.OK).body((long)-1);
 
     }
